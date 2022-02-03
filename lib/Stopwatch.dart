@@ -131,16 +131,34 @@ class _StopwatchPageState extends State<StopwatchPage> {
       _locationSubscription!.cancel();
       isStopped = true;
     } else {
-      _stopwatch.start();
-      isStopped = false;
-      _listenLocation();
-      Timer.periodic(const Duration(seconds: 5), (tick) {
-        if (isStopped) {
-          tick.cancel();
-        }
-        report_to_server();
+      if(permitted){
+        _stopwatch.start();
+        isStopped = false;
+        _listenLocation();
+        Timer.periodic(const Duration(seconds: 5), (tick) {
+          if (isStopped) {
+            tick.cancel();
+          }else{
+            report_to_server();
+          }
         });
         debugPrint("im here");
+      }else{
+        setState(() {
+        reset();
+        final snackBar = SnackBar(
+          content: const Text('Please head to settings and give us permission.'),
+          action: SnackBarAction(
+            label: 'Got it!',
+            onPressed: () {
+              //nothing
+            },
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        });
+      }
+
     }
     setState(() {});    // re-render the page
   }  
