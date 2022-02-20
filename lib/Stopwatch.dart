@@ -104,7 +104,9 @@ class _StopwatchPageState extends State<StopwatchPage> {
       v = currentlocation.speed!.toStringAsFixed(2);
       N = currentlocation.latitude!;
       W = currentlocation.longitude!;
-      d = roundDouble(calculateDistance(departn, departw, N, W), 2);
+      d = d + roundDouble(calculateDistance(departn, departw, N, W), 2);
+      departn = N;
+      departw = W;
     });
   }
 

@@ -1,65 +1,29 @@
 // ignore_for_file: use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
-import 'Stopwatch.dart';
-import 'History.dart';
-
-void main() {runApp(MyApp());}
-
-
+import 'package:runboyrun/Auth.dart';
+import 'package:runboyrun/HomePage.dart';
+import 'Auth.dart';
+import 'transition_route_observer.dart';
+import 'HomePage.dart';
+void main() {runApp(const MyApp());}
 
 class MyApp extends StatelessWidget {
+  
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Stopwatch Example', 
-      home: MyHomePage(),
-      theme: ThemeData(primarySwatch: Colors.grey),
+      navigatorObservers: [TransitionRouteObserver()],
+      initialRoute: LoginScreen.routeName,
+      routes: {
+        LoginScreen.routeName: (context) => const LoginScreen(),
+        MyHomePage.routeName: (context) => const MyHomePage(),
+      },
     );
   }
 }
 
-
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context){
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        //backgroundColor: const Color(0xFF000000),
-        appBar: AppBar( 
-          title: const Center (
-            child: Text("Run boy!  RUN!!!"),
-          ),
-          bottom: const TabBar(
-            tabs: [
-              Tab(icon : Icon(Icons.directions_bike_sharp)),
-              Tab(icon : Icon(Icons.history)),
-              Tab(icon : Icon(Icons.settings))
-            ],
-          ), 
-        ),
-        body: TabBarView(
-          children:[
-            StopwatchPage(),
-            HistoryPage(),
-            SettingsPage(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SettingsPage extends StatelessWidget {
-
-  @override
-  Widget build(BuildContext context){
-    return Column(
-      children: const [
-        Icon(Icons.directions_transit),
-      ],
-    );
-  }
-}
 
