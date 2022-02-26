@@ -5,11 +5,15 @@ import 'package:runboyrun/HomePage.dart';
 import 'users.dart';
 import 'HomePage.dart';
 import 'custom_route.dart';
+import 'sqlite.dart';
+
 //https://github.com/NearHuscarl/flutter_login
+//final db = DatabaseHelper.instance.insert();
+
+
 
 class LoginScreen extends StatelessWidget {
   static const routeName = '/auth';
-
   const LoginScreen({Key? key}) : super(key: key);
 
   Duration get loginTime => Duration(milliseconds: timeDilation.ceil() * 2250);
@@ -54,7 +58,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlutterLogin(
-      title: "RUNBOYRUN",
+      title: "Run boy!  RUN!!!",
       navigateBackAfterRecovery: true,
       onConfirmRecover: _signupConfirm,
       onConfirmSignup: _signupConfirm,
@@ -101,7 +105,7 @@ class LoginScreen extends StatelessWidget {
       },
       onSubmitAnimationCompleted: () {
         Navigator.of(context).pushReplacement(FadePageRoute(
-          builder: (context) => MyHomePage(),
+          builder: (context) => const MyHomePage(),
         ));
       },
       onRecoverPassword: (name) {

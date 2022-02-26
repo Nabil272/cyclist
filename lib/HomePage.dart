@@ -60,21 +60,22 @@ class _MyHomePageState extends State<MyHomePage>
   AppBar _buildAppBar(ThemeData theme) {
     final signOutBtn = IconButton(
       icon: const Icon(FontAwesomeIcons.signOutAlt),
-      color: Colors.orangeAccent,
+      color: Colors.black,
       onPressed: () => _goToLogin(context),
     );
     final title = Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const <Widget>[
-          Text("Run boy!  RUN!!!"),
+          Text("Run boy!  RUN!!!", style: TextStyle(color :Colors.black)),
           SizedBox(width: 20),
         ],
       ),
     );
 
     return AppBar(
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.orangeAccent,
+      foregroundColor: Colors.grey,
       actions: <Widget>[
         FadeIn(
           controller: _loadingController,
@@ -86,9 +87,10 @@ class _MyHomePageState extends State<MyHomePage>
       ],
       title: title,
       bottom: const TabBar(
+        indicatorColor:Colors.grey,
         tabs: [
-          Tab(icon : Icon(Icons.directions_bike_sharp)),
-          Tab(icon : Icon(Icons.history)),
+          Tab(icon : Icon(Icons.directions_bike_sharp, color :Colors.black)),
+          Tab(icon : Icon(Icons.history, color :Colors.black)),
         ],
       ), 
     );

@@ -6,6 +6,8 @@ import 'package:runboyrun/HomePage.dart';
 import 'Auth.dart';
 import 'transition_route_observer.dart';
 import 'HomePage.dart';
+import 'sqlite.dart';
+
 void main() {runApp(const MyApp());}
 
 class MyApp extends StatelessWidget {
@@ -15,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Stopwatch Example', 
+      title: 'Run Boy! RUN!!!',
       navigatorObservers: [TransitionRouteObserver()],
       initialRoute: LoginScreen.routeName,
       routes: {

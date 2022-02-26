@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
+import 'package:runboyrun/sqlite.dart';
 
 //Convertir les Millisecondes en format HH/MM/SS
 String formatTime(int milliseconds) {
@@ -15,11 +16,6 @@ String formatTime(int milliseconds) {
   return "$hours:$minutes:$seconds";
 }
 
-//Faire un arrondissement 2 positions aprés la virgule
-double roundDouble(double value, int places){ 
-   num mod = pow(10.0, places); 
-   return ((value * mod).round().toDouble() / mod); 
-}
 
 //Calculter la distance entre 2 points de position
 double calculateDistance(lat1, lon1, lat2, lon2){
@@ -46,11 +42,12 @@ class _StopwatchPageState extends State<StopwatchPage> {
   late Timer _timer;  
   
   //Variables a monitoriser
-  double d = 0.0;
+  String d = '00.00';
+  double _d = 0;
   String v = '00.00';
   double departn = 0, N = 0;
   double departw = 0, W = 0;
-  double h = 0;
+  String h = '00.00';
 
   //Variables de position
   Location locate = Location();
@@ -64,7 +61,7 @@ class _StopwatchPageState extends State<StopwatchPage> {
   Future<http.Response> report_to_server() {
     debugPrint("sending once every 5 seconds");
     return http.post(
-      Uri.parse('http://yakuru43.pythonanywhere.com/test/'),
+      Uri.parse('https://yakuru43.pythonanywhere.com/test/'),
       headers:{
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -75,12 +72,21 @@ class _StopwatchPageState extends State<StopwatchPage> {
         "longitude" : W.toString(),
         "distance" : d.toString(),
         "hauteur" : h.toString(),
-        "timestamp" : DateTime.now().millisecondsSinceEpoch,
+        "timestamp" : DateTime.now().toString(),
       })
     );
   }
 
   void get_permission() async {
+    // ignore: unrelated_type_equality_checks
+    var t = await locate.hasPermission();
+    if (t.name == "granted" ){
+      permitted = true;
+      final LocationData data = await locate.getLocation();
+      departn = data.latitude!;
+      departw = data.longitude!;
+      return ;
+    }
     serviceEnabled = await locate.requestService();
     if(serviceEnabled){
       permissionGranted = await locate.requestPermission();
@@ -104,7 +110,9 @@ class _StopwatchPageState extends State<StopwatchPage> {
       v = currentlocation.speed!.toStringAsFixed(2);
       N = currentlocation.latitude!;
       W = currentlocation.longitude!;
-      d = d + roundDouble(calculateDistance(departn, departw, N, W), 2);
+      _d = _d + calculateDistance(departn, departw, N, W);
+      d = _d.toStringAsFixed(2);
+      h = currentlocation.altitude!.toStringAsFixed(2);
       departn = N;
       departw = W;
     });
@@ -114,6 +122,7 @@ class _StopwatchPageState extends State<StopwatchPage> {
   void initState() {
     super.initState();
     get_permission();
+    
     _stopwatch = Stopwatch();
     // re-render every 30ms
     _timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
@@ -141,23 +150,34 @@ class _StopwatchPageState extends State<StopwatchPage> {
           if (isStopped) {
             tick.cancel();
           }else{
+            // Send data to server
             report_to_server();
+
+            // Save the data locally on phone
+            Position p = Position();
+            p.Date = DateTime.now().toString();
+            p.speed = v.toString();
+            p.Longtitude = N.toString();
+            p.Latitude = W.toString();
+            p.Altitude = h.toString();
+            p.distance = d.toString();
+            DatabaseHelper.instance.insert(p);
+
           }
         });
-        debugPrint("im here");
       }else{
         setState(() {
-        reset();
-        final snackBar = SnackBar(
-          content: const Text('Please head to settings and give us permission.'),
-          action: SnackBarAction(
-            label: 'Got it!',
-            onPressed: () {
+          reset();
+          final snackBar = SnackBar(
+            content: const Text('Please head to settings and give us permission.'),
+            action: SnackBarAction(
+              label: 'Got it!',
+              onPressed: () {
               //nothing
-            },
-          ),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              },
+            ),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBar);
         });
       }
 
@@ -166,7 +186,7 @@ class _StopwatchPageState extends State<StopwatchPage> {
   }  
 
   void reset() {
-    _locationSubscription!.cancel();
+    _locationSubscription?.cancel();
     _stopwatch.stop();
     _stopwatch.reset();
     isStopped = true;
@@ -274,8 +294,21 @@ class _StopwatchPageState extends State<StopwatchPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(onPressed: handleStartStop, child: Text(_stopwatch.isRunning ? 'Pause' : 'Start')),
-                ElevatedButton(onPressed: reset, child: const Text('Stop')),
+                ElevatedButton(
+                  onPressed: handleStartStop,
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.orangeAccent,
+                  ),
+                  child: Text(_stopwatch.isRunning ? 'Pause' : 'Start', style: const TextStyle(color: Colors.black, fontSize: 15))
+                ),
+                const SizedBox(width: 30),
+                ElevatedButton(
+                  onPressed: reset, 
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.orangeAccent,
+                  ),
+                  child: const Text('Stop', style: TextStyle(color: Colors.black, fontSize: 15))
+                ),
               ],
             )
           )
@@ -284,3 +317,9 @@ class _StopwatchPageState extends State<StopwatchPage> {
     );
   }
 }
+
+
+
+
+
+
